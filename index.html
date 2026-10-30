@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f8fc">
+  <title>CareWatch | Smart Hospital Rooms</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" data-view="dashboard" aria-label="CareWatch dashboard">
+        <span class="brand-icon">+</span><span><strong>CareWatch</strong><small>SMART CARE SYSTEM</small></span>
+      </a>
+      <div class="nav-label">WORKSPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" data-view="dashboard"><span>▦</span> Dashboard</button>
+        <button class="nav-item" data-view="rooms"><span>▣</span> All Rooms</button>
+        <button class="nav-item" data-view="alerts"><span>♢</span> Active Alerts <b id="nav-alert-count" class="nav-count">0</b></button>
+        <button class="nav-item" data-view="settings"><span>⚙</span> Settings</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="system-card"><span class="live-dot"></span><span><strong id="connection-label">Connecting…</strong><small id="connection-detail">Checking hospital API</small></span></div>
+        <div class="profile"><div class="avatar">CW</div><span><strong>Care team</strong><small>Room monitoring</small></span></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" id="menu-button" aria-label="Open menu">☰</button>
+        <div class="breadcrumbs">Hospital <span>/</span> <strong id="breadcrumb-current">Dashboard</strong></div>
+        <div class="top-actions">
+          <span id="mode-badge" class="mode-badge hidden">DEMO MODE</span>
+          <button class="icon-button" id="notification-button" title="Enable browser notifications" aria-label="Enable notifications">♧</button>
+          <span class="today-label" id="today-label"></span>
+        </div>
+      </header>
+
+      <div id="backend-error" class="backend-error hidden" role="alert"></div>
+      <div id="demo-banner" class="demo-banner hidden"><strong>DEMO MODE</strong> — Sample readings are simulated and are not live sensor data.</div>
+      <div id="global-emergency-banner" class="alert-banner hidden" role="alert"></div>
+
+      <section id="dashboard-view" class="view">
+        <div class="page-heading">
+          <div><p class="eyebrow">OVERVIEW</p><h1>Room monitoring</h1><p class="subheading">A live view of room conditions and device connectivity.</p></div>
+          <button class="button button-outline" id="refresh-button">↻ <span>Refresh data</span></button>
+        </div>
+        <div class="summary-grid" id="summary-grid"></div>
+        <div class="section-heading"><div><h2>Rooms</h2><p>Choose a room to view detailed sensor readings.</p></div><button class="text-button" data-view="rooms">View all rooms <span>→</span></button></div>
+        <div class="room-grid" id="room-grid"></div>
+        <section class="emergency-panel">
+          <div class="emergency-icon">!</div><div class="emergency-copy"><h2>Emergency response</h2><p>Emergency events from room buttons remain active until authorized staff resolve them.</p></div>
+          <button class="button button-danger" id="test-emergency">Trigger demo emergency</button>
+        </section>
+      </section>
+
+      <section id="rooms-view" class="view hidden">
+        <div class="page-heading"><div><p class="eyebrow">MONITORING</p><h1>All rooms</h1><p class="subheading">Current connectivity and room status.</p></div></div>
+        <div class="room-grid" id="all-room-grid"></div>
+      </section>
+
+      <section id="detail-view" class="view hidden">
+        <div class="page-heading detail-heading">
+          <div><button class="back-button" data-view="rooms">← All rooms</button><p class="eyebrow">ROOM MONITORING</p><h1 id="detail-title">ROOM-101</h1><p class="subheading" id="detail-subtitle">Live sensor information</p></div>
+          <span class="last-refresh" id="detail-updated">Waiting for sensor update</span>
+        </div>
+        <div id="detail-error" class="sensor-error hidden"></div>
+        <div id="detail-cards" class="detail-grid"></div>
+        <section class="detail-bottom">
+          <div class="panel"><div class="panel-heading"><div><h2>Room occupancy</h2><p>Occupancy is not inferred from PIR motion.</p></div></div><div id="occupancy-control" class="occupancy-control"></div></div>
+          <div class="panel"><div class="panel-heading"><div><h2>Environmental status</h2><p>Demonstration thresholds; not universal hospital standards.</p></div></div><div id="environment-status"></div></div>
+        </section>
+      </section>
+
+      <section id="alerts-view" class="view hidden">
+        <div class="page-heading"><div><p class="eyebrow">RESPONSE CENTER</p><h1>Active alerts</h1><p class="subheading">Acknowledge and resolve emergency events independently.</p></div></div>
+        <div id="alert-banner" class="alert-banner hidden" role="alert"></div>
+        <div id="alerts-list" class="alerts-list"></div>
+      </section>
+
+      <section id="settings-view" class="view hidden">
+        <div class="page-heading"><div><p class="eyebrow">PREFERENCES</p><h1>Settings</h1><p class="subheading">Configure demonstration thresholds and authorized staff actions.</p></div></div>
+        <div class="settings-grid">
+          <form id="threshold-form" class="panel settings-panel">
+            <h2>Environmental thresholds</h2><p>Demonstration thresholds only; not clinical or universal safety limits.</p>
+            <label>Temperature minimum (°C)<input name="tempMin" type="number" step="0.1" required></label>
+            <label>Temperature maximum (°C)<input name="tempMax" type="number" step="0.1" required></label>
+            <label>Humidity minimum (% RH)<input name="humidityMin" type="number" step="1" required></label>
+            <label>Humidity maximum (% RH)<input name="humidityMax" type="number" step="1" required></label>
+            <label>MQ-7 raw ADC warning threshold<input name="gasThreshold" type="number" min="0" max="4095" step="1" required></label>
+            <p class="form-note">Raw ADC is not CO ppm. Uncalibrated readings cannot establish that air is safe.</p>
+            <button class="button button-primary" type="submit">Save thresholds</button><span id="settings-message" class="inline-message"></span>
+          </form>
+          <form id="staff-form" class="panel settings-panel">
+            <h2>Authorized staff actions</h2><p>Provide the token configured in Flask as <code>HOSPITAL_STAFF_TOKEN</code>.</p>
+            <label>Staff API token<input name="staffToken" type="password" autocomplete="off" placeholder="Not stored by the server"></label>
+            <p class="form-note">The token is stored in this browser only. Without a configured server token, real-room updates and alert actions are disabled. ESP32 ingestion requires the server's <code>HOSPITAL_DEVICE_TOKEN</code> as the <code>X-Device-Token</code> header.</p>
+            <button class="button button-primary" type="submit">Save staff token</button><span id="staff-message" class="inline-message"></span>
+          </form>
+          <div class="panel demo-settings"><h2>Demonstration</h2><p>Demo readings are separate from live API data. Switching modes does not change server readings or real alerts.</p><label class="toggle-row"><span><strong>DEMO MODE</strong><small>Use labelled simulated sensor readings.</small></span><input id="demo-toggle" type="checkbox"><i></i></label><div class="demo-action"><button class="button button-danger" id="test-emergency-settings">Trigger demo emergency</button><small>Demo alerts are stored only in this browser.</small></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="script.js" defer></script>
+</body>
+</html>
